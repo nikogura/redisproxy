@@ -43,8 +43,10 @@ func TestCache_Get(t *testing.T) {
 	assert.False(t, entry.Fresh(), "Entry has expired")
 
 	entry, err = c.Get(key)
-
-	actual = entry.value
+	if err != nil {
+		log.Printf("Error fetching key %s: %s", key, err)
+		t.Fail()
+	}
 
 	assert.True(t, entry.Fresh(), "Newly fetched entry is fresh.")
 
