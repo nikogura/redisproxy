@@ -50,6 +50,13 @@ func TestCache_Get(t *testing.T) {
 
 	assert.True(t, entry.Fresh(), "Newly fetched entry is fresh.")
 
+	expectedNumber := 10
+	entry, err = c.Get("ten")
+
+	actualNumber := entry.value
+
+	assert.Equal(t, expectedNumber, actualNumber, "Fetchng numbers works too")
+
 }
 
 func TestCache_CacheLimit(t *testing.T) {
