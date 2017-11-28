@@ -1,4 +1,4 @@
-package redisproxy
+package cache
 
 import "log"
 
