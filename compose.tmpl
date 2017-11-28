@@ -1,0 +1,13 @@
+version: '3'
+services:
+  proxy:
+    build: .
+    ports:
+      - __PORT__:__PORT__
+    volumes:
+      - .:/code
+    links:
+      - redis
+  redis:
+    image: "redis:alpine"
+

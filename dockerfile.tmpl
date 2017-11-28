@@ -1,0 +1,7 @@
+FROM golang
+ADD . /go/src/github.com/nikogura/redisproxy
+WORKDIR /go/src/github.com/nikogura/redisproxy
+RUN go get github.com/kardianos/govendor
+RUN govendor sync
+RUN go install
+CMD ["redisproxy", "run", "-c", "__SIZE__", "-e", "__EXPIRATION__", "-p", "__PORT__", "-r", "__REDIS__"]

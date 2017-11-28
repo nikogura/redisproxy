@@ -33,10 +33,6 @@ Runs the proxy with the supplied options.
 Does not detatch from the console.
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		if redisAddr == "" {
-			log.Fatalf("Cannot run without an IP address for a Redis instance.  Try again with: -r <redis ip:port>")
-		}
-
 		portString := strconv.Itoa(cachePort)
 
 		port := fmt.Sprintf(":%s", portString)
@@ -44,7 +40,7 @@ Does not detatch from the console.
 		log.Printf("Starting Cache on port %s\n", port)
 		log.Printf("Cache Expiration: %d seconds\n", cacheExpirationSeconds)
 		log.Printf("Cache Capacity: %d entries\n", cacheCapacity)
-		log.Printf("Upstream Redis IP Address: %s\n", redisAddr)
+		log.Printf("Upstream Redis Instance: %q\n", redisAddr)
 
 		http.HandleFunc("/", handler)
 		http.ListenAndServe(port, nil)

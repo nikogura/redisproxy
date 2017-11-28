@@ -69,7 +69,7 @@ func init() {
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	//RootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	RootCmd.PersistentFlags().StringVarP(&redisAddr, "redis", "r", "", "Redis IP address")
+	RootCmd.PersistentFlags().StringVarP(&redisAddr, "redis", "r", "redis", "Redis address or hostname.  Default 'redis'")
 	RootCmd.PersistentFlags().IntVarP(&cachePort, "port", "p", 5000, "Port for the Cache to listen on. Default 5000")
 	RootCmd.PersistentFlags().IntVarP(&cacheExpirationSeconds, "expiration", "e", 5, "Cache item expiration in seconds.  Default 5.")
 	RootCmd.PersistentFlags().IntVarP(&cacheCapacity, "capacity", "c", 100, "Cache capacity. Default 100.")
