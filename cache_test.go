@@ -16,7 +16,7 @@ func TestCache_Get(t *testing.T) {
 
 	entry, err := c.Get(key)
 	if err != nil {
-		log.Printf("Error fetching key %s: err", key, err)
+		log.Printf("Error fetching key %s: %s", key, err)
 		t.Fail()
 	}
 
@@ -56,7 +56,7 @@ func TestCache_CacheLimit(t *testing.T) {
 	key1 := testFoo()
 	_, err := c.Get(key1)
 	if err != nil {
-		log.Printf("Error fetching key %s: err", key1, err)
+		log.Printf("Error fetching key %s: %s", key1, err)
 		t.Fail()
 	}
 
@@ -65,7 +65,7 @@ func TestCache_CacheLimit(t *testing.T) {
 	key2 := testBar()
 	_, err = c.Get(key2)
 	if err != nil {
-		log.Printf("Error fetching key %s: err", key2, err)
+		log.Printf("Error fetching key %s: %s", key2, err)
 		t.Fail()
 	}
 
@@ -76,7 +76,7 @@ func TestCache_CacheLimit(t *testing.T) {
 	key3 := testWip()
 	_, err = c.Get(key3)
 	if err != nil {
-		log.Printf("Error fetching key %s: err", key3, err)
+		log.Printf("Error fetching key %s: %s", key3, err)
 		t.Fail()
 	}
 
@@ -87,7 +87,7 @@ func TestCache_CacheLimit(t *testing.T) {
 	key4 := testZoz()
 	_, err = c.Get(key4)
 	if err != nil {
-		log.Printf("Error fetching key %s: err", key4, err)
+		log.Printf("Error fetching key %s: %s", key4, err)
 		t.Fail()
 	}
 
