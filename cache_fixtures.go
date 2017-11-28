@@ -50,7 +50,7 @@ func testCacheData() (info map[string]interface{}) {
 	return info
 }
 
-func UnitTestFetchFunc(key string) (value interface{}, err error) {
+func unitTestFetchFunc(key string) (value interface{}, err error) {
 	log.Printf("In test fetch func\n")
 	data := testCacheData()
 

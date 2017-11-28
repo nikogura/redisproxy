@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-// The actual cache object
+// Cache The actual cache object
 type Cache struct {
 	sync.RWMutex
 	ttl             time.Duration
@@ -101,6 +101,7 @@ func (c *Cache) RemoveElement(key string, element *list.Element) {
 	c.RUnlock()
 }
 
+// Fetch What actually reaches out and gets stuff by locking the cache and running the fetch func
 func (c *Cache) Fetch(key string) (entry *CacheEntry, err error) {
 	c.logger.Printf("In Fetch\n")
 	now := time.Now()

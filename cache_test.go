@@ -8,7 +8,7 @@ import (
 )
 
 func TestCache_Get(t *testing.T) {
-	c := NewCache(3, time.Second*3, UnitTestFetchFunc, time.Second*1)
+	c := NewCache(3, time.Second*3, unitTestFetchFunc, time.Second*1)
 
 	key := testFoo()
 
@@ -51,7 +51,7 @@ func TestCache_Get(t *testing.T) {
 }
 
 func TestCache_CacheLimit(t *testing.T) {
-	c := NewCache(3, time.Second*3, UnitTestFetchFunc, time.Second*1)
+	c := NewCache(3, time.Second*3, unitTestFetchFunc, time.Second*1)
 
 	key1 := testFoo()
 	_, err := c.Get(key1)
