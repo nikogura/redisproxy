@@ -22,6 +22,6 @@ func testValue() string {
 func testEntry() CacheEntry {
 	return CacheEntry{
 		expires: time.Now().Add(testInterval()),
-		value: testValue(),
+		value:   testValue(),
 	}
 }

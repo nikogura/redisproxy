@@ -1,8 +1,8 @@
 package redisproxy
 
 import (
-	"testing"
 	"github.com/stretchr/testify/assert"
+	"testing"
 	"time"
 )
 

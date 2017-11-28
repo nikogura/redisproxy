@@ -5,12 +5,11 @@ import "time"
 // CacheEntry  a struct representing a single cached entry
 type CacheEntry struct {
 	expires time.Time
-	value interface{}
-
+	value   interface{}
 }
 
 // Fresh  Returns true if the current time is less than the entry's expiration.  Returns false otherwise.
-func (e *CacheEntry) Fresh() (bool) {
+func (e *CacheEntry) Fresh() bool {
 	ttl := time.Now().Sub(e.expires)
 
 	if ttl < 0 {
@@ -19,5 +18,3 @@ func (e *CacheEntry) Fresh() (bool) {
 
 	return false
 }
-
-
