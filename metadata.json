@@ -1,0 +1,9 @@
+{
+  "version": "0.1.0",
+  "package": "github.com/nikogura/redisproxy",
+  "description": "An experiment in go proxying stuff, in this case, redis",
+  "buildtargets": [
+    "darwin/amd64",
+    "linux/amd64"
+  ]
+}
