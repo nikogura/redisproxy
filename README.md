@@ -18,7 +18,29 @@ It's intended for use on Linux or Mac machines.  No attempt at Windows compatabi
 
 ## Packages
 
-There is a single package hierarchy
+There is a single package hierarchy under *github.com/nikogura/redisproxy/proxy'.  Within that package you'll find subpackages for *cache*, *cmd*, and *service*.
+
+Within each package you will find files of the pattern:
+
+* foo.go
+* foo_test.go
+* foo_fixtures.go
+
+The \*_test.go is a normal Go pattern for tests.  The \*_fixtures.go file is my own convention.  I prefer to keep the actual test data out of the tests as much as possible and keep them in their own place.
+
+Tests are Code, and generally you want to keep Code and Data separate.  This is a goal.  It is not always practical to follow to its full extension.
+
+### Cache
+
+The cache package contains the cache itself, and the code for entries within the cache.
+
+### Service
+
+The service package contains the code that runs the actual http proxy service and hosts the cache.
+
+### Cmd
+
+The cmd package is a built in feature of the Cobra command framework.  I used Cobra because it's clean, easy, saves time, and generally does a whiz-bang job of making not only command line parsing easy, but also making it easy to have useful and accurate help messages.
 
 # Requirements
 
@@ -71,6 +93,20 @@ The following values may be configured in the Makefile for testing:
 * Whether the containers stay attached in the foreground. * default: false*
 
 
+# Running
+
+If it is your pleasure to actually build, install, and run the proxy directly, you may do so via:
+
+    go install
+    
+If your $GOPATH/bin is in your $PATH, you can run the proxy via:
+
+    redisproxy run -c (SIZE) -e (EXPIRATION) -p (PORT) -r (REDIS)
+    
+If you run into trouble, run:
+
+    redisproxy help
+    
 # Testing
 
 ## One Click Validation
@@ -130,9 +166,11 @@ Again, I'm guessing you have more advanced test harnesses for verification.  I'v
 
 # Time to Completion
 
+This took longer than would be ideal, but it forced me to dig deeper into some Go constructs than I've been before.  The first time is always slow.
+
 * The cache itself and it's attendant fixtures and tests took about 3 hours.
 
-* The http server, which I knew about, but hadn't messed with before, took another 30 - 45 minutes.
+* The http server, which I knew about, but hadn't messed with before, took another hour or so.  Refactoring it to be able to use it in in-code integration tests took another hour.  It wasn't purely necessary, but I'm happier with the result.
 
 * The dockerfile and docker compose stuff was maybe 30 minutes.
 
@@ -145,6 +183,8 @@ I could do channels that blocked, channels that didn't block, but didn't wait fo
 I combed the internet looking for examples, I invented new ways to phrase my problem.  Finally I found someone else's project that was close enough to the simplicity I craved, and got very angry.  He seemed to be able to pull off what was eluding me.  He got something that looked like my first attempt to work before I went down the channel rabbit hole.  
 
 Turned out it was the magical struct.  Duh.  Of course, once I understood it I saw it in a bunch of other threads.  It was there, I just couldn't absorb it until I wore a forehead shaped hole in the wall.  Interesting though.  I've been meaning to investigate channels.
+
+* Documentation was perhaps an hour or so sprinkled throughout the project.
 
 # Unimplemented Requirements
 
