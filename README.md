@@ -88,7 +88,7 @@ The following values may be configured in the Makefile for testing:
 
 * The port to run the proxy on *default: 5050*
 
-* Expiration in seconds for the items in the cache * default: 5*
+* Expiration in seconds for the items in the cache *default: 5*
 
 * Address of redis cache *default: redis*
 
