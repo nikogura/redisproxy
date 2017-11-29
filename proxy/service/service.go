@@ -1,8 +1,9 @@
-package cache
+package service
 
 import (
 	"fmt"
 	"github.com/go-redis/redis"
+	"github.com/nikogura/redisproxy/proxy/cache"
 	"log"
 	"net/http"
 	"reflect"
@@ -14,19 +15,34 @@ import (
 
 // Proxy struct to represent the proxy server itself
 type Proxy struct {
-	Cache     *Cache
+	Cache     *cache.Cache
 	RedisAddr string
 	Port      string
 }
 
-// NewProxy creates, guess what?  a new proxy
+// NewProxy creates, guess what?  a new proxy.  Uses the default redis fetcher client.
 func NewProxy(port int, maxEntries int, maxAge int, timeout int, redisAddr string) *Proxy {
 	portString := strconv.Itoa(port)
 
 	realPort := fmt.Sprintf(":%s", portString)
 
 	proxy := &Proxy{
-		Cache:     NewCache(maxEntries, time.Duration(maxAge)*time.Second, Fetcher, time.Duration(timeout)*time.Second, redisAddr),
+		Cache:     cache.NewCache(maxEntries, time.Duration(maxAge)*time.Second, Fetcher, time.Duration(timeout)*time.Second, redisAddr),
+		Port:      realPort,
+		RedisAddr: redisAddr,
+	}
+
+	return proxy
+}
+
+// TestProxy is just like NewProxy, but allows you to hand in a custom fetch func for testing.
+func TestProxy(port int, maxEntries int, maxAge int, timeout int, redisAddr string, fetcher cache.FetchFunc) *Proxy {
+	portString := strconv.Itoa(port)
+
+	realPort := fmt.Sprintf(":%s", portString)
+
+	proxy := &Proxy{
+		Cache:     cache.NewCache(maxEntries, time.Duration(maxAge)*time.Second, fetcher, time.Duration(timeout)*time.Second, redisAddr),
 		Port:      realPort,
 		RedisAddr: redisAddr,
 	}
@@ -54,9 +70,8 @@ func (p *Proxy) Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("Get result: %s", entry.Value)
-
 	if entry != nil {
+		log.Printf("Get result: %s", entry.Value)
 		value := entry.Value
 
 		valtype := reflect.TypeOf(value).String()

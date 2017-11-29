@@ -16,7 +16,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/nikogura/redisproxy/cache"
+	"github.com/nikogura/redisproxy/proxy/service"
 	"github.com/spf13/cobra"
 	"log"
 	"strconv"
@@ -40,7 +40,7 @@ Does not detatch from the console.
 		log.Printf("Cache Capacity: %d entries\n", cacheCapacity)
 		log.Printf("Upstream Redis Instance: %q\n", redisAddr)
 
-		proxy := cache.NewProxy(cachePort, cacheCapacity, cacheExpirationSeconds, 5, redisAddr)
+		proxy := service.NewProxy(cachePort, cacheCapacity, cacheExpirationSeconds, 5, redisAddr)
 
 		err := proxy.Run()
 		if err != nil {

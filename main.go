@@ -1,6 +1,6 @@
 package main
 
-import "github.com/nikogura/redisproxy/cache/cmd"
+import "github.com/nikogura/redisproxy/proxy/cmd"
 
 func main() {
 	cmd.Execute()

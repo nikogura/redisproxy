@@ -13,16 +13,16 @@ import (
 // Cache The actual cache object
 type Cache struct {
 	sync.RWMutex
-	ttl             time.Duration
-	entries         map[string]*list.Element
-	maxEntries      int
-	ageList         *list.List
-	fetchFunc       FetchFunc
+	Ttl             time.Duration
+	Entries         map[string]*list.Element
+	MaxEntries      int
+	AgeList         *list.List
+	FetchFunc       FetchFunc
 	fetchLock       sync.Mutex
-	fetchInProgress map[string]time.Time
-	fetchTimeout    time.Duration
+	FetchInProgress map[string]time.Time
+	FetchTimeout    time.Duration
 	logger          *log.Logger
-	redisAddr       string
+	RedisAddr       string
 }
 
 // FetchFunc Fetcher function.  Implemented separately so that I can make a mock one for testing
@@ -33,15 +33,15 @@ func NewCache(maxEntries int, maxAge time.Duration, fetchFunc FetchFunc, fetchTi
 
 	logger := log.New(os.Stderr, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
 	c := &Cache{
-		ttl:             maxAge,
-		entries:         make(map[string]*list.Element),
-		maxEntries:      maxEntries,
-		fetchInProgress: make(map[string]time.Time),
-		ageList:         list.New(),
-		fetchFunc:       fetchFunc,
-		fetchTimeout:    fetchTimeout,
+		Ttl:             maxAge,
+		Entries:         make(map[string]*list.Element),
+		MaxEntries:      maxEntries,
+		FetchInProgress: make(map[string]time.Time),
+		AgeList:         list.New(),
+		FetchFunc:       fetchFunc,
+		FetchTimeout:    fetchTimeout,
 		logger:          logger,
-		redisAddr:       redisAddr,
+		RedisAddr:       redisAddr,
 	}
 
 	return c
@@ -53,7 +53,7 @@ func (c *Cache) Get(key string) (entry *CacheEntry, err error) {
 	// lock so it doesn't get written while we're reading it
 
 	c.RLock()
-	element, exists := c.entries[key]
+	element, exists := c.Entries[key]
 	c.RUnlock()
 
 	//  If it isn't in the cache, go get it.
@@ -74,7 +74,7 @@ func (c *Cache) Get(key string) (entry *CacheEntry, err error) {
 	// If it *is* in the cache, return it if it's fresh, moving it to the head of the age list, since it's now the freshest.
 	if entry.Fresh() {
 		c.RLock()
-		c.ageList.MoveToFront(element)
+		c.AgeList.MoveToFront(element)
 		c.RUnlock()
 
 		return entry, err
@@ -103,10 +103,10 @@ func (c *Cache) RemoveElement(element *list.Element) {
 		c.RLock()
 		key := entry.Key
 
-		if _, ok := c.entries[key]; ok {
-			delete(c.entries, key)
+		if _, ok := c.Entries[key]; ok {
+			delete(c.Entries, key)
 		}
-		c.ageList.Remove(element)
+		c.AgeList.Remove(element)
 
 		c.RUnlock()
 		return
@@ -123,10 +123,10 @@ func (c *Cache) Fetch(key string) (entry *CacheEntry, err error) {
 	c.fetchLock.Lock()
 
 	// Are we already fetching it?
-	start, exists := c.fetchInProgress[key]
+	start, exists := c.FetchInProgress[key]
 
 	// if so, have we timed out?
-	if exists && start.Add(c.fetchTimeout).Before(now) {
+	if exists && start.Add(c.FetchTimeout).Before(now) {
 		c.logger.Printf("We are already fetching %s", key)
 		// if so, screw it, return an error
 		c.fetchLock.Unlock()
@@ -135,11 +135,11 @@ func (c *Cache) Fetch(key string) (entry *CacheEntry, err error) {
 		return entry, err
 	}
 
-	c.fetchInProgress[key] = now
+	c.FetchInProgress[key] = now
 	c.fetchLock.Unlock()
 
 	// actually get the thing we're looking for
-	value, err := c.fetchFunc(key, c.redisAddr)
+	value, err := c.FetchFunc(key, c.RedisAddr)
 	if err != nil {
 		err = errors.Wrap(err, fmt.Sprintf("Failed to fetch %s", key))
 		return entry, err
@@ -147,22 +147,22 @@ func (c *Cache) Fetch(key string) (entry *CacheEntry, err error) {
 
 	if value != nil { // dont' bother storing nil values.
 		entry = &CacheEntry{
-			Expires: now.Add(c.ttl),
+			Expires: now.Add(c.Ttl),
 			Value:   value,
 			Key:     key,
 		}
 
 		c.RLock()
 
-		element := c.ageList.PushFront(entry)
+		element := c.AgeList.PushFront(entry)
 
-		c.entries[key] = element
+		c.Entries[key] = element
 
 		// Finally, check to see if we're over the configured cache size
-		if len(c.entries) > c.maxEntries {
-			c.logger.Printf("Max entries of %d reached.", c.maxEntries)
+		if len(c.Entries) > c.MaxEntries {
+			c.logger.Printf("Max entries of %d reached.", c.MaxEntries)
 			c.logger.Printf("Too many entries.  Purging the eldest.")
-			eldest := c.ageList.Back()
+			eldest := c.AgeList.Back()
 			c.RemoveElement(eldest)
 		}
 
@@ -170,7 +170,7 @@ func (c *Cache) Fetch(key string) (entry *CacheEntry, err error) {
 	}
 
 	c.fetchLock.Lock()
-	delete(c.fetchInProgress, key)
+	delete(c.FetchInProgress, key)
 	c.fetchLock.Unlock()
 
 	return entry, err

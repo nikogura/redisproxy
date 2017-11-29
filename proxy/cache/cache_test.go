@@ -52,6 +52,10 @@ func TestCache_Get(t *testing.T) {
 
 	expectedNumber := 10
 	entry, err = c.Get("ten")
+	if err != nil {
+		log.Printf("Error getting key: %s", err)
+		t.Fail()
+	}
 
 	actualNumber := entry.Value
 
@@ -69,7 +73,7 @@ func TestCache_CacheLimit(t *testing.T) {
 		t.Fail()
 	}
 
-	assert.True(t, len(c.entries) == 1, "one entry in cache")
+	assert.True(t, len(c.Entries) == 1, "one entry in cache")
 
 	key2 := testBar()
 	_, err = c.Get(key2)
@@ -78,9 +82,9 @@ func TestCache_CacheLimit(t *testing.T) {
 		t.Fail()
 	}
 
-	log.Printf("%d entries in cache", len(c.entries))
+	log.Printf("%d entries in cache", len(c.Entries))
 
-	assert.True(t, len(c.entries) == 2, "two entries in cache")
+	assert.True(t, len(c.Entries) == 2, "two entries in cache")
 
 	key3 := testWip()
 	_, err = c.Get(key3)
@@ -89,9 +93,9 @@ func TestCache_CacheLimit(t *testing.T) {
 		t.Fail()
 	}
 
-	log.Printf("%d entries in cache", len(c.entries))
+	log.Printf("%d entries in cache", len(c.Entries))
 
-	assert.True(t, len(c.entries) == 3, "three entries in cache")
+	assert.True(t, len(c.Entries) == 3, "three entries in cache")
 
 	key4 := testZoz()
 	_, err = c.Get(key4)
@@ -100,7 +104,7 @@ func TestCache_CacheLimit(t *testing.T) {
 		t.Fail()
 	}
 
-	log.Printf("%d entries in cache", len(c.entries))
+	log.Printf("%d entries in cache", len(c.Entries))
 
-	assert.True(t, len(c.entries) == 3, "three entries in cache")
+	assert.True(t, len(c.Entries) == 3, "three entries in cache")
 }
