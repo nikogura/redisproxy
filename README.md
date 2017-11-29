@@ -192,9 +192,9 @@ Turned out it was the magical struct.  Duh.  Of course, once I understood it I s
 
 # Unimplemented Requirements
 
-It doesn't transparently proxy RESP.  Honestly, if we want to go that far, let's just use Nginx.  
+I chose not to transparently proxy RESP.  Honestly, if we want to go that far, let's just use Nginx or HAProxy.  
 
-It's lready proven, sets up in minutes.  Right tool for the right job.  
+It's already proven, sets up in minutes.  There's a whole lot of testing and support around it.  Right tool for the right job.  
 
 I might have taken a stab at it if I hadn't gone down the channel rabbit hole, but enough is enough.
 
