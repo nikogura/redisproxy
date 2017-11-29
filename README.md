@@ -121,7 +121,11 @@ To test, run:
     
 2 containers will spin up.  A generic redis container and the actual proxy. the generic redis container will be filled with some very limited test data.
   
-Unit tests are run as part of the proxy build.  You'll see the results on the screen as they come out.  If one were to bomb, ```make test``` will fail.
+Unit tests for the *cache* package are run as part of the proxy build.  Tests for the *service* package are run as well.  Basically the same tests are performed on the cache first by itself in memory, and then through the http service.  Technically that makes them integration tests, not unit tests, but who am I to quibble?  I prefer to test the pieces individually, and then again in groups.  The more help I can give myself in isolating the exact point of the error, the faster the fixes will be.
+
+You'll see the results on the screen as they come out.  If one were to bomb, ```make test``` will fail.
+
+Full blown integration tests are performed against the container via the Makefile.  You should see TAP (Test Anything Protocol) output for those.
 
 Obviously, if you prefer to test against an existing cache, modify the REDIS in the makefile.  If you don't add a port, port 6379 will be assumed.
 
