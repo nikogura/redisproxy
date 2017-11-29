@@ -94,7 +94,7 @@ The following values may be configured in the Makefile for testing:
 
 * Size of cache (number of items) *default: 3* (makes the cache size handling easy to test)
 
-* Whether the containers stay attached in the foreground. * default: false*
+* Whether the containers stay attached in the foreground. *default: false*
 
 
 # Running
