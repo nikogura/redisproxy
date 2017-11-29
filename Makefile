@@ -136,4 +136,4 @@ ab-nasty:
 	ab -n 1000 -c 30 http://localhost:$(PORT)/foo
 
 ab-omg-what-are-you-trying-to-prove:
-	ab -n 1000 -c 50 http://localhsot:5050/foo
+	ab -n 1000 -c 50 http://localhost:5050/foo
