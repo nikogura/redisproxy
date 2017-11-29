@@ -16,6 +16,10 @@ The test demonstrator is implemented in a pair of docker containers, built and r
 
 It's intended for use on Linux or Mac machines.  No attempt at Windows compatability has been made at this time.
 
+## Packages
+
+There is a single package hierarchy
+
 # Requirements
 
 * Docker or Docker for Mac
