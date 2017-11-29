@@ -101,7 +101,7 @@ The following values may be configured in the Makefile for testing:
 
 If it is your pleasure to actually build, install, and run the proxy directly, you may do so via:
 
-    go install
+    go install github.com/nikogura/redisproxy
     
 If your $GOPATH/bin is in your $PATH, you can run the proxy via:
 
@@ -140,9 +140,11 @@ Once you're done, running ```make clean``` will shut down the containers politel
 
 Assuming you have a fully setup GOPATH, when run from the checked out [git repository](https://github.com/nikogura/redisproxy), the following will allow you to test the code:
 
-    cd /place/where/you/checked/out/the/code
+    go get github.com/nikogura/redisproxy
 
-    go get github.com/kardianos/govendor
+    cd $GOPATH/src/github.com/nikogura/redisproxy
+
+    go install github.com/kardianos/govendor
     
     govendor sync
     
@@ -154,13 +156,11 @@ Gomason is a tool for doing local tests in a clean, ephemeral GOPATH.  Gomason a
 
 Install it via:
 
-    go get github.com/nikogura/gomason
-    
     go install github.com/nikogura/gomason
     
 Test via:
 
-    cd /place/where/you/checked/out/the/code
+    cd $GO/src/github.com/nikogura/redisproxy
     
     gomason test
 
