@@ -17,10 +17,14 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/go-redis/redis"
+	"github.com/nikogura/redisproxy/cache"
 	"github.com/spf13/cobra"
 	"log"
 	"net/http"
+	"regexp"
 	"strconv"
+	"time"
 )
 
 // runCmd represents the run command
@@ -42,7 +46,9 @@ Does not detatch from the console.
 		log.Printf("Cache Capacity: %d entries\n", cacheCapacity)
 		log.Printf("Upstream Redis Instance: %q\n", redisAddr)
 
-		http.HandleFunc("/", handler)
+		c := cache.NewCache(cacheCapacity, time.Duration(cacheExpirationSeconds)*time.Second, fetcher, time.Second*5)
+
+		http.Handle("/", Handler{cache: c})
 		http.ListenAndServe(port, nil)
 	},
 }
@@ -50,18 +56,54 @@ Does not detatch from the console.
 func init() {
 	RootCmd.AddCommand(runCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// runCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// runCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
+type Handler struct {
+	cache *cache.Cache
+}
+
+func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprint(w, "Howdy\n")
+
+	entry, err := h.cache.Get("foo")
+	if err != nil {
+		fmt.Fprintf(w, "Error: %s\n", err)
+	}
+
+	if entry != nil {
+		value := entry.Value
+		fmt.Fprint(w, value)
+	}
+
+	fmt.Fprint(w, "nil")
+}
+
+func fetcher(key string) (value interface{}, err error) {
+	r := regexp.MustCompile(`.+:\d+`)
+
+	var fqRedisAddr string
+
+	if r.MatchString(redisAddr) {
+		fqRedisAddr = redisAddr
+	} else {
+		fqRedisAddr = fmt.Sprintf("%s:6379", redisAddr)
+	}
+
+	client := redis.NewClient(&redis.Options{
+		Addr:     fqRedisAddr,
+		Password: "",
+		DB:       0,
+	})
+
+	fetchedval, err := client.Get(key).Result()
+	if err == redis.Nil {
+		return value, err
+	} else if err != nil {
+		return value, err
+	}
+
+	value = fetchedval
+
+	return value, err
 }

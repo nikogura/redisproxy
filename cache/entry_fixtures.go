@@ -21,7 +21,7 @@ func testValue() string {
 // testEntry  A fully formed CacheEntry to be used for testing
 func testEntry() CacheEntry {
 	return CacheEntry{
-		expires: time.Now().Add(testInterval()),
-		value:   testValue(),
+		Expires: time.Now().Add(testInterval()),
+		Value:   testValue(),
 	}
 }

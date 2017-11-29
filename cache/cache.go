@@ -134,8 +134,8 @@ func (c *Cache) Fetch(key string) (entry *CacheEntry, err error) {
 
 	if value != nil { // dont' bother storing nil values.
 		entry = &CacheEntry{
-			expires: now.Add(c.ttl),
-			value:   value,
+			Expires: now.Add(c.ttl),
+			Value:   value,
 		}
 
 		c.RLock()

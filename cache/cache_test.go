@@ -20,21 +20,21 @@ func TestCache_Get(t *testing.T) {
 		t.Fail()
 	}
 
-	actual := entry.value
+	actual := entry.Value
 
 	assert.Equal(t, expected, actual, "fetched string matches expectations")
 
-	ttl1 := time.Now().Sub(entry.expires)
+	ttl1 := time.Now().Sub(entry.Expires)
 
 	time.Sleep(time.Second * 1)
 
 	entry, err = c.Get(key)
 
-	actual = entry.value
+	actual = entry.Value
 
 	assert.Equal(t, expected, actual, "fetched string matches expectations")
 
-	ttl2 := time.Now().Sub(entry.expires)
+	ttl2 := time.Now().Sub(entry.Expires)
 
 	assert.True(t, ttl2 > ttl1, "Time to live is indeed winding down.")
 
@@ -53,7 +53,7 @@ func TestCache_Get(t *testing.T) {
 	expectedNumber := 10
 	entry, err = c.Get("ten")
 
-	actualNumber := entry.value
+	actualNumber := entry.Value
 
 	assert.Equal(t, expectedNumber, actualNumber, "Fetchng numbers works too")
 
