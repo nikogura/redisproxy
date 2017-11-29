@@ -18,10 +18,15 @@ func testValue() string {
 	return "goongala"
 }
 
+func testKey() string {
+	return "fargle"
+}
+
 // testEntry  A fully formed CacheEntry to be used for testing
 func testEntry() CacheEntry {
 	return CacheEntry{
 		Expires: time.Now().Add(testInterval()),
 		Value:   testValue(),
+		Key:     testKey(),
 	}
 }

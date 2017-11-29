@@ -8,6 +8,10 @@ services:
       - .:/code
     links:
       - redis
+    depends_on:
+      - redis
   redis:
+    ports:
+      - 6379:6379
     image: "redis:alpine"
 

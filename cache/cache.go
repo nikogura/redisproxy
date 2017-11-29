@@ -22,13 +22,14 @@ type Cache struct {
 	fetchInProgress map[string]time.Time
 	fetchTimeout    time.Duration
 	logger          *log.Logger
+	redisAddr       string
 }
 
 // FetchFunc Fetcher function.  Implemented separately so that I can make a mock one for testing
-type FetchFunc func(key string) (value interface{}, err error)
+type FetchFunc func(key string, redisAddr string) (value interface{}, err error)
 
 // NewCache  Creates a new cache.  Requires arguments for maxEntries (number of items in the cache) and maxAge(How long something will reside in the cache)
-func NewCache(maxEntries int, maxAge time.Duration, fetchFunc FetchFunc, fetchTimeout time.Duration) *Cache {
+func NewCache(maxEntries int, maxAge time.Duration, fetchFunc FetchFunc, fetchTimeout time.Duration, redisAddr string) *Cache {
 
 	logger := log.New(os.Stderr, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
 	c := &Cache{
@@ -40,6 +41,7 @@ func NewCache(maxEntries int, maxAge time.Duration, fetchFunc FetchFunc, fetchTi
 		fetchFunc:       fetchFunc,
 		fetchTimeout:    fetchTimeout,
 		logger:          logger,
+		redisAddr:       redisAddr,
 	}
 
 	return c
@@ -60,6 +62,8 @@ func (c *Cache) Get(key string) (entry *CacheEntry, err error) {
 		return c.Fetch(key)
 	}
 
+	c.logger.Printf("Retrieving item from cache.")
+
 	// this will, of course blow chunks if the entry's value is not a CacheElement.
 	entry, ok := element.Value.(*CacheEntry)
 	if !ok {
@@ -78,7 +82,7 @@ func (c *Cache) Get(key string) (entry *CacheEntry, err error) {
 
 	// At this point it is in the cache, but it's stale.  Get rid of it.
 	// locking and unlocking are performed in the function.
-	c.RemoveElement(key, element)
+	c.RemoveElement(element)
 
 	// Get a fresh version
 	entry, err = c.Fetch(key)
@@ -91,19 +95,29 @@ func (c *Cache) Get(key string) (entry *CacheEntry, err error) {
 	return entry, err
 }
 
-// RemoveElement Removes the element and key from the list and age list.
-func (c *Cache) RemoveElement(key string, element *list.Element) {
-	c.RLock()
-	if _, ok := c.entries[key]; ok {
-		delete(c.entries, key)
+// RemoveElement Removes the element from the list and age list.
+func (c *Cache) RemoveElement(element *list.Element) {
+	entry, ok := element.Value.(*CacheEntry)
+	if ok {
+		c.logger.Printf("Purging %s from cache", entry.Key)
+		c.RLock()
+		key := entry.Key
+
+		if _, ok := c.entries[key]; ok {
+			delete(c.entries, key)
+		}
+		c.ageList.Remove(element)
+
+		c.RUnlock()
+		return
 	}
-	c.ageList.Remove(element)
-	c.RUnlock()
+
+	c.logger.Printf("Failed to remove element.  WTF did you put in here?")
+
 }
 
 // Fetch What actually reaches out and gets stuff by locking the cache and running the fetch func
 func (c *Cache) Fetch(key string) (entry *CacheEntry, err error) {
-	c.logger.Printf("In Fetch\n")
 	now := time.Now()
 	// fetch item
 	c.fetchLock.Lock()
@@ -124,9 +138,8 @@ func (c *Cache) Fetch(key string) (entry *CacheEntry, err error) {
 	c.fetchInProgress[key] = now
 	c.fetchLock.Unlock()
 
-	c.logger.Printf("Calling fetchFunc\n")
 	// actually get the thing we're looking for
-	value, err := c.fetchFunc(key)
+	value, err := c.fetchFunc(key, c.redisAddr)
 	if err != nil {
 		err = errors.Wrap(err, fmt.Sprintf("Failed to fetch %s", key))
 		return entry, err
@@ -136,6 +149,7 @@ func (c *Cache) Fetch(key string) (entry *CacheEntry, err error) {
 		entry = &CacheEntry{
 			Expires: now.Add(c.ttl),
 			Value:   value,
+			Key:     key,
 		}
 
 		c.RLock()
@@ -145,11 +159,11 @@ func (c *Cache) Fetch(key string) (entry *CacheEntry, err error) {
 		c.entries[key] = element
 
 		// Finally, check to see if we're over the configured cache size
-		c.logger.Printf("Max entries: %d", c.maxEntries)
 		if len(c.entries) > c.maxEntries {
-			c.logger.Printf("Too many entries.  Purging one.")
-			// remove the oldest entry from the ageList
-			c.RemoveElement(key, element)
+			c.logger.Printf("Max entries of %d reached.", c.maxEntries)
+			c.logger.Printf("Too many entries.  Purging the eldest.")
+			eldest := c.ageList.Back()
+			c.RemoveElement(eldest)
 		}
 
 		c.RUnlock()

@@ -16,18 +16,12 @@ package cmd
 
 import (
 	"fmt"
-
-	"github.com/go-redis/redis"
 	"github.com/nikogura/redisproxy/cache"
 	"github.com/spf13/cobra"
 	"log"
-	"net/http"
-	"regexp"
 	"strconv"
-	"time"
 )
 
-// runCmd represents the run command
 var runCmd = &cobra.Command{
 	Use:   "run",
 	Short: "Run the proxy with the supplied options",
@@ -46,10 +40,13 @@ Does not detatch from the console.
 		log.Printf("Cache Capacity: %d entries\n", cacheCapacity)
 		log.Printf("Upstream Redis Instance: %q\n", redisAddr)
 
-		c := cache.NewCache(cacheCapacity, time.Duration(cacheExpirationSeconds)*time.Second, fetcher, time.Second*5)
+		proxy := cache.NewProxy(cachePort, cacheCapacity, cacheExpirationSeconds, 5, redisAddr)
 
-		http.Handle("/", Handler{cache: c})
-		http.ListenAndServe(port, nil)
+		err := proxy.Run()
+		if err != nil {
+			log.Fatalf("Error Running proxy: %s", err)
+		}
+
 	},
 }
 
@@ -58,52 +55,71 @@ func init() {
 
 }
 
-type Handler struct {
-	cache *cache.Cache
-}
-
-func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
-	fmt.Fprint(w, "Howdy\n")
-
-	entry, err := h.cache.Get("foo")
-	if err != nil {
-		fmt.Fprintf(w, "Error: %s\n", err)
-	}
-
-	if entry != nil {
-		value := entry.Value
-		fmt.Fprint(w, value)
-	}
-
-	fmt.Fprint(w, "nil")
-}
-
-func fetcher(key string) (value interface{}, err error) {
-	r := regexp.MustCompile(`.+:\d+`)
-
-	var fqRedisAddr string
-
-	if r.MatchString(redisAddr) {
-		fqRedisAddr = redisAddr
-	} else {
-		fqRedisAddr = fmt.Sprintf("%s:6379", redisAddr)
-	}
-
-	client := redis.NewClient(&redis.Options{
-		Addr:     fqRedisAddr,
-		Password: "",
-		DB:       0,
-	})
-
-	fetchedval, err := client.Get(key).Result()
-	if err == redis.Nil {
-		return value, err
-	} else if err != nil {
-		return value, err
-	}
-
-	value = fetchedval
-
-	return value, err
-}
+//type Proxy struct {
+//	cache *cache.Cache
+//}
+//
+//func (p *Proxy) handle(w http.ResponseWriter, r *http.Request) {
+//	key := strings.TrimPrefix(r.RequestURI, "/")
+//
+//	log.Printf("Received request for %s\n", key)
+//
+//	entry, err := p.cache.Get(key)
+//	if err != nil {
+//		fmt.Fprintf(w, "Error: %s\n", err)
+//		return
+//	}
+//
+//	log.Printf("Get result: %s", entry.Value)
+//
+//	if entry != nil {
+//		value := entry.Value
+//
+//		valtype := reflect.TypeOf(value).String()
+//
+//		if valtype == "string" {
+//			fmt.Fprintf(w, "%q\n", value)
+//		} else {
+//			fmt.Fprintf(w, "(%s) %s\n", valtype, value)
+//		}
+//		log.Printf("Done with request\n")
+//
+//		return
+//	}
+//
+//	log.Printf("No result, sending nil\n")
+//
+//	fmt.Fprint(w, "(nil)\n")
+//	log.Printf("Done with request\n")
+//
+//}
+//
+//// Fetcher The function that actually gets info from redis.
+//func Fetcher(key string) (value interface{}, err error) {
+//	r := regexp.MustCompile(`.+:\d+`)
+//
+//	var fqRedisAddr string
+//
+//	if r.MatchString(redisAddr) {
+//		fqRedisAddr = redisAddr
+//	} else {
+//		fqRedisAddr = fmt.Sprintf("%s:6379", redisAddr)
+//	}
+//
+//	client := redis.NewClient(&redis.Options{
+//		Addr:     fqRedisAddr,
+//		Password: "",
+//		DB:       0,
+//	})
+//
+//	fetchedval, err := client.Get(key).Result()
+//	if err == redis.Nil {
+//		return value, nil
+//	} else if err != nil {
+//		return value, err
+//	}
+//
+//	value = fetchedval
+//
+//	return value, err
+//}

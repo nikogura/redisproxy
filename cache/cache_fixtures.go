@@ -1,7 +1,5 @@
 package cache
 
-import "log"
-
 // you could argue that these are silly, but I really don't want to hard code test values in the tests.
 
 // The test is itself code, and we should always separate code from data.  Plus, reading this you are introduced to the type of testdata I'm expecting.
@@ -50,15 +48,12 @@ func testCacheData() (info map[string]interface{}) {
 	return info
 }
 
-func unitTestFetchFunc(key string) (value interface{}, err error) {
-	log.Printf("In test fetch func\n")
+func unitTestFetchFunc(key string, redisAddr string) (value interface{}, err error) {
 	data := testCacheData()
 
 	if elem, ok := data[key]; ok {
-		log.Printf("Fetcher returning value: %s", elem)
 		return elem, nil
 	}
 
-	log.Printf("Fetcher Returning nil\n")
 	return value, err
 }

@@ -4,4 +4,10 @@ WORKDIR /go/src/github.com/nikogura/redisproxy
 RUN go get github.com/kardianos/govendor
 RUN govendor sync
 RUN go install
-CMD ["redisproxy", "run", "-c", "__SIZE__", "-e", "__EXPIRATION__", "-p", "__PORT__", "-r", "__REDIS__"]
+RUN DEBIAN_FRONTEND=noninteractive apt-get -qq update
+RUN DEBIAN_FRONTEND=noninteractive apt-get -qq install --no-install-recommends -y redis-tools
+ENV SIZE __SIZE__
+ENV EXPIRATION __EXPIRATION__
+ENV PORT __PORT__
+ENV REDIS __REDIS__
+CMD ["./run.sh"]
