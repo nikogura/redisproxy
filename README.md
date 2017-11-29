@@ -133,6 +133,9 @@ Testing and verification wise, it will test itself, hitting the cache repeatedly
 
 The requirement for 'no additonal software' puts the kybosh on any proper test fixture.  Sorry.
 
+
+Once you're done, running ```make clean``` will shut down the containers politely and clean up after itself.  Wish my kids would do the same.
+
 ## Go Test
 
 Assuming you have a fully setup GOPATH, when run from the checked out [git repository](https://github.com/nikogura/redisproxy), the following will allow you to test the code:
