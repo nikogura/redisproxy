@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"testing"
+	"time"
 )
 
 var proxy *Proxy
@@ -40,7 +41,9 @@ func setUp() {
 
 	go proxy.Run()
 
-	log.Printf("Proxy is running.\n")
+	log.Printf("Proxy is running.  Sleeping 5 seconds to let it get it's bearings before we hit it.\n")
+
+	time.Sleep(time.Second * 5)
 
 	log.Printf("Setup complete.\n")
 
