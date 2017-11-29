@@ -160,7 +160,7 @@ Install it via:
     
 Test via:
 
-    cd $GO/src/github.com/nikogura/redisproxy
+    cd $GOPATH/src/github.com/nikogura/redisproxy
     
     gomason test
 
