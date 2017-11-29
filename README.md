@@ -133,6 +133,18 @@ Testing and verification wise, it will test itself, hitting the cache repeatedly
 
 The requirement for 'no additonal software' puts the kybosh on any proper test fixture.  Sorry.
 
+## Go Test
+
+Assuming you have a fully setup GOPATH, when run from the checked out [git repository](https://github.com/nikogura/redisproxy), the following will allow you to test the code:
+
+    cd /place/where/you/checked/out/the/code
+
+    go get github.com/kardianos/govendor
+    
+    govendor sync
+    
+    go test -v ./...
+
 ## Cache Limit Validation
 If you want to see the cache limiting behavior happening before your eyes, you'll need 2 terminals.  
 
