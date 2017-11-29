@@ -18,7 +18,7 @@ It's intended for use on Linux or Mac machines.  No attempt at Windows compatabi
 
 ## Packages
 
-There is a single package hierarchy under *github.com/nikogura/redisproxy/proxy'.  Within that package you'll find subpackages for *cache*, *cmd*, and *service*.
+There is a single package hierarchy under *github.com/nikogura/redisproxy/proxy*.  Within that package you'll find subpackages for *cache*, *cmd*, and *service*.
 
 Within each package you will find files of the pattern:
 
@@ -70,13 +70,17 @@ Since a fetch is performed, and then the cache size is checked, and reduced, the
 
 According to 'gocyclo', it's 100%.  I'm not sure what that's really worth however.
 
-Fetch of a cached element aught to be damn near constant time, as it's just a hash lookup.
+Determining whether an item is in the cache aught to be constant time, as it's just a hash lookup.  Likewise retrieving a cached element is quick, as it's just a hash lookup
 
-Fetch of a non-cached element is of course going to be dependent on the internals of the Redis client and the network.
+Fetch of a non-cached element is of course going to be dependent on the internals of the Redis client and the network.  That won't be constant, but we're not really trying to rate that part of the problem.
+
+Determining the age of an element should likewise be pretty quick.
 
 The required LRU functionality's complexity is going to be entirely dependent on how "container/list" is implemented.  Given that it's a Go builtin, I would expect it's fairly fast.
 
-Due to the purge mechanism, once the cache fills to capacity, there will be an additonal overhead of 2 remove operations on every fetch.  At the scale this demo is intended to run at, that was judged to be an acceptable trade off for not implementing a periodic background expiration purger routine.
+Due to the purge mechanism, once the cache fills to capacity, there will be an additional overhead of 2 remove operations on every fetch.  At the scale this demo is intended to run at, that was judged to be an acceptable trade off for not implementing a periodic background expiration purger routine.
+
+At a greater scale, a background purger that proactively gets rid of the stale entries might be just the ticket.
 
 # Configuration
 
