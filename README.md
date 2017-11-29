@@ -144,6 +144,22 @@ Assuming you have a fully setup GOPATH, when run from the checked out [git repos
     govendor sync
     
     go test -v ./...
+    
+## Gomason Testing
+
+Gomason is a tool for doing local tests in a clean, ephemeral GOPATH.  Gomason at this time requires you to use SSH keys to connect with Github. ('git clone git@github.com:nikogura/redisproxy.git' rather than 'git clone https://github.com/nikogura/redisproxy.git')
+
+Install it via:
+
+    go get github.com/nikogura/gomason
+    
+    go install github.com/nikogura/gomason
+    
+Test via:
+
+    cd /place/where/you/checked/out/the/code
+    
+    gomason test
 
 ## Cache Limit Validation
 If you want to see the cache limiting behavior happening before your eyes, you'll need 2 terminals.  
